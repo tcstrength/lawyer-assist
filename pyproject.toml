@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "legal-ai"
+name = "lawyer-assist"
 version = "0.1.0"
 description = ""
 authors = ["tcstrength <thai.cuong1404@gmail.com>"]
@@ -9,6 +9,12 @@ readme = "README.md"
 python = "^3.12"
 streamlit = "^1.36.0"
 ipykernel = "^6.29.5"
+lxml = "^5.2.2"
+html2text = "^2024.2.26"
+python-dotenv = "^1.0.1"
+loguru = "^0.7.2"
+tqdm = "^4.66.4"
+cohere = "^5.5.8"
 
 
 [build-system]
