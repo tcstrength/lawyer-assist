@@ -9,12 +9,15 @@ import glob
 import json
 import cohere
 from time import sleep
+from time import time
 from hashlib import md5
 from typing import Dict
 from typing import List
 from pathlib import Path
 from tqdm import tqdm
 from loguru import logger
+from multiprocessing.pool import ThreadPool
+from threading import Lock
 from util import config
 
 PROMPT_TEMPLATE = """
@@ -47,8 +50,14 @@ Here is the legal article:
 
 class DataProcessing:
     def __init__(self, src_dir: str, tgt_dir: str, api_key: str):
+        logger.info(
+            f"Initialize Data Processing instance, read data from {src_dir} "
+            f"and write to {tgt_dir}, {self}"
+        )
+
         self.src_dir = src_dir
         self.tgt_dir = tgt_dir
+        self.api_key = api_key[:10] + "..."
         self.co = cohere.Client(api_key)
         Path(self.tgt_dir).mkdir(exist_ok=True)
 
@@ -70,89 +79,40 @@ class DataProcessing:
         prompt = PROMPT_TEMPLATE.replace("{{article}}", raw["md"])
         resp = self.co.chat(message=prompt, temperature=0)
         return json.loads(resp.text)
-
-    # def extract_qna(self, raw: Dict[str, object]):
-    #     tools = [cohere.Tool(
-    #         name="extract_qna",
-    #         description="Extract and log the question and answer and keywords in given legal article.",
-    #         parameter_definitions={
-    #             "docs": cohere.ToolParameterDefinitionsValue(
-    #                 description=(
-    #                     "List of dictionaries extracted from the legal article. The dictionary "
-    #                     "requires 4 keys: `question`, `answer`. The `question` is the question "
-    #                     "or circumstance that people want to be explained, the question should "
-    #                     "remove sensitive data such as name, email. The `answer` is the response "
-    #                     "for the corresponding question and it should contains detailed "
-    #                     "information including terms, definitions, clauses, and circulars."
-    #                 ),
-    #                 type="List[Dict[str, str]]",
-    #                 required=True
-    #             ),
-    #             # "question": cohere.ToolParameterDefinitionsValue(
-    #             #     description=(
-    #             #         "The question or circumstance that people want to be explained "
-    #             #         "in detailed."
-    #             #     ),
-    #             #     type="List[str]",
-    #             #     required=True
-    #             # ),
-    #             # "answer": cohere.ToolParameterDefinitionsValue(
-    #             #     description=(
-    #             #         "The details of answer, keep all the circulars, clauses and "
-    #             #         "sanctions, note that summarized answer is not accepted."
-    #             #     ),
-    #             #     type="str",
-    #             #     required=True
-    #             # ),
-    #             # "conslusions": cohere.ToolParameterDefinitionsValue(
-    #             #     description=(
-    #             #         "The conclusion of the article, usually directly answer the question."
-    #             #     ),
-    #             #     type="list",
-    #             #     required=True
-    #             # ),
-    #             # "keywords": cohere.ToolParameterDefinitionsValue(
-    #             #     description="The keywords found on the document.",
-    #             #     type="str",
-    #             #     required=True
-    #             # )
-    #         }
-    #     )]
-
-    #     preamble="""
-    #     ## Task Description
-    #     You need to extract keywords, questions or circumstances, and answers in the given article.
-
-    #     ## Style Guide
-    #     Unless the user asks for a different style of answer, you should answer in full sentences, using proper grammar and spelling in Vietnamese.
-    #     """
-
-    #     document = raw.get("md")
-    #     response = self.co.chat(
-    #         message=f"## Article\n{document}",
-    #         tools=tools,
-    #         preamble=preamble
-    #     )
-    #     params = response.tool_calls[0].parameters
-    #     return params
     
-
+def extract_load(bar: tqdm, lock: Lock, data_proc: DataProcessing, path: str):
+    raw = json.load(open(path))
+    start = time()
+    try:
+        processed_data = data_proc.extract_qna(raw)
+        data_proc.log_qna(raw, processed_data)
+        wait = max(6 - time() - start, 0)
+        sleep(wait)
+    except Exception as e:
+        logger.warning(f"Failed to extract path={path}, key={data_proc.api_key}, {e}")
+    with lock:
+        bar.update(1)
 
 def main():
-    data_proc = DataProcessing(
-        src_dir=config.DATA_ARTICLE_DIR,
-        tgt_dir=config.DATA_QNA_DIR,
-        api_key=config.COHERE_API_KEY
-    )
+    api_keys = config.COHERE_API_KEY.split(";")
+    data_procs = [
+        DataProcessing(
+            src_dir=config.DATA_ARTICLE_DIR,
+            tgt_dir=config.DATA_QNA_DIR,
+            api_key=api_key
+        )
+        for api_key in api_keys
+    ]
 
-    for path in tqdm(data_proc.list_article_paths(), desc="Processing data..."):
-        raw = json.load(open(path))
-        try:
-            processed_data = data_proc.extract_qna(raw)
-            data_proc.log_qna(raw, processed_data)
-            sleep(10)
-        except Exception as e:
-            logger.warning(f"Failed to extract path={path}, {e}")
+    paths = data_procs[0].list_article_paths()[1511:]
+    bar = tqdm(paths, desc="Processing data...")
+    lock = Lock()
+    params = [
+        (bar, lock, data_procs[i % 2], paths[i])
+        for i in range(len(paths))]
+
+    with ThreadPool(processes=len(data_procs)) as pool:
+        pool.starmap(extract_load, params)
 
 if __name__ == "__main__":
     main()
