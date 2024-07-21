@@ -14,3 +14,4 @@ DATA_SRC_URL_PREFIX = os.getenv(
     "DATA_SRC_URL_PREFIX", "https://thuvienphapluat.vn/hoi-dap-phap-luat/tien-te-ngan-hang"
 )
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
+LAWYER_API_URL = os.getenv("LAWYER_API_URL")
