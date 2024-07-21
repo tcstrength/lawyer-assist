@@ -1,8 +1,14 @@
+from datetime import datetime
 from abc import abstractmethod
 from typing import List, Dict
+from pydantic import BaseModel as PydanticModel
+
+class StreamResponse(PydanticModel):
+    response_id: str
+    content: str
+    created_at: int
 
 class BaseModel:
-
     def __init__(self):
         pass
 
