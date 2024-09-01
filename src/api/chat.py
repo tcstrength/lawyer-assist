@@ -6,7 +6,7 @@ Date: 2024-07-04
 
 import pydantic
 from typing import List
-from typing import Tuple
+from typing import Dict 
 from enum import Enum
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
@@ -20,7 +20,8 @@ class ChatType(Enum):
 
 class ChatRequest(pydantic.BaseModel):
     user_input: str
-    history: List[Tuple[str, str]] = []
+    history: List[Dict[str, str]] = []
+    max_tokens: int = 1024
 
 
 class ChatAPI:
@@ -28,8 +29,12 @@ class ChatAPI:
         self._model = model
         self._type = type
         self._router = APIRouter()
-        self._router.add_api_route(f"/chat/{type}", self.chat, methods=["POST"])
+        self._router.add_api_route(f"/chat/{type.value}", self.chat, methods=["POST"])
 
     async def chat(self, req: ChatRequest):
-        stream = self._model.generate(req.user_input, max_tokens=512)
+        stream = self._model.generate(
+            user_input=req.user_input,
+            max_tokens=req.max_tokens,
+            history=req.history
+        )
         return StreamingResponse(stream)
