@@ -39,6 +39,9 @@ pyvi = "^0.1.1"
 # mlx-lm = "^0.15.3"
 beautifulsoup4 = "^4.12.3"
 qdrant-client = "^1.11.1"
+transformers = "^4.44.2"
+torch = "^2.4.0"
+sentence-transformers = "^3.0.1"
 
 [tool.poetry.group.frontend]
 optional = true
