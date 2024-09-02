@@ -1,6 +1,10 @@
 #!/bin/bash
 
-export PYTHONPATH=/Users/tccuong1404/Documents/Project/lawyer-assist/src
+SOURCE=$(readlink -f ${BASH_SOURCE[0]})
+DIRNAME=$(dirname ${SOURCE})
+
+# export PYTHONPATH=/Users/tccuong1404/Documents/Project/lawyer-assist/src
+export PYTHONPATH=$DIRNAME/src
 
 if [ "$1" == "api" ]; then
     poetry run fastapi run src/api/main.py

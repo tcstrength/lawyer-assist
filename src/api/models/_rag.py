@@ -1,7 +1,7 @@
 from typing import Dict, List
 from api.models._base import BaseModel
 
-class RAG(BaseModel):
+class RAGModel(BaseModel):
 
     def generate(
         self,

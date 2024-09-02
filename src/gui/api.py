@@ -11,7 +11,7 @@ from enum import Enum
 from util import config
 
 class ModelArch(Enum):
-    FINETUNE = "Fine-tuned Gemma-2B"
+    FINETUNE = "Gemma-2B"
     RAG = "RAG"
     
 def post_chat_stream(user_input: str, history: list, model: str):
