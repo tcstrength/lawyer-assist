@@ -24,12 +24,6 @@ setuptools = "^70.3.0"
 protobuf = "^5.27.2"
 pyyaml = "^6.0.1"
 jinja2 = "^3.1.4"
-fastapi = "^0.111.1"
-uvicorn = "^0.30.1"
-sentence-transformers = "^3.0.1"
-mlx-lm = "^0.15.3"
-pyvi = "^0.1.1"
-bert-score = "^0.3.13"
 
 [tool.poetry.group.api]
 optional = true
@@ -38,16 +32,12 @@ fastapi = "^0.111.1"
 cohere = "^5.5.8"
 uvicorn = "^0.30.1"
 pyvi = "^0.1.1"
-# transformers = "^4.42.4"
-# mlx = "^0.16.0"
-# sentencepiece = "^0.2.0"
-# sentence-transformers = "^3.0.1"
-# mlx-lm = "^0.15.3"
 beautifulsoup4 = "^4.12.3"
 qdrant-client = "^1.11.1"
 transformers = "^4.44.2"
 torch = "^2.4.0"
 sentence-transformers = "^3.0.1"
+bert-score = "^0.3.13"
 
 [tool.poetry.group.frontend]
 optional = true
@@ -60,7 +50,7 @@ ipykernel = "^6.29.5"
 
 [tool.poetry.scripts]
 run-api = "uvicorn:src.api.main.app --reload --host 0.0.0.0 --port 8000"
-rin_frontend = "streamlit:run src/gui/main.py --server.port=8501 --server.address=0.0.0.0"
+run_frontend = "streamlit:run src/gui/main.py --server.port=8501 --server.address=0.0.0.0"
 
 [build-system]
 requires = ["poetry-core"]

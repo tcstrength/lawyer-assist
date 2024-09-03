@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: src/api/Dockerfile
     ports:
-      - "8000:8000"
+      - "9000:8000"
     volumes:
       - ./src/api:/app/api
     depends_on:
@@ -16,7 +16,7 @@ services:
       context: .
       dockerfile: src/gui/Dockerfile
     ports:
-      - "3000:3000"
+      - "3000:8501"
     volumes:
       - ./src/gui:/app/gui
     stdin_open: true

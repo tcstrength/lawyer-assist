@@ -4561,12 +4561,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-<<<<<<< HEAD
-content-hash = "3e6357c29fcc282665177cdf72b3d2286a56a49ab7bbb834304b602d4d409d81"
-=======
-<<<<<<< HEAD
-content-hash = "99be8784d4b7fbe4ee0fccc0da9a1d29b20f983c38c5a9a567f632650ef1b879"
-=======
-content-hash = "1546f9ddecd172b05e0a15d64e25a9f64e022be04c7b526aa994d5f44d959662"
->>>>>>> b6973a9664b913ee64fa28f47288da0fe9882fcd
->>>>>>> 43de8b82383982e1c169b9c1fa9b4a982d8ca043
+content-hash = "f1e0ba51091c27b9fca80e68c38cb5ecdc45a9bc65f5a94376e92fcb3fed8409"

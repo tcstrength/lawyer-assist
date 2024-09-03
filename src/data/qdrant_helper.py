@@ -52,7 +52,7 @@ class QdrantHelper:
                  similarity_metric=models.Distance.COSINE,
                  embedding_dimension=384,
                  collection_name="law_collection",
-                 batch_size=100,
+                 batch_size=10,
                  embedding_model_id="sentence-transformers/all-MiniLM-L6-v2"):
         self._client = QdrantClient(host=host, port=port)
         self.embedding_model_id = embedding_model_id
@@ -70,24 +70,23 @@ class QdrantHelper:
             self._client.create_collection(
                 collection_name=collection_name,
                 vectors_config=VectorParams(size=embedding_dimension, distance=similarity_metric),
-                shard_number=4,
             )
 
     def _embed(self, text):
         return self._embeding_model.encode(text)
 
-    def _batched(iterable, n):
+    def _batched(self, iterable):
         """Yield successive n-sized chunks from the iterable."""
         it = iter(iterable)
         while True:
-            batch = list(islice(it, n))
+            batch = list(islice(it, self.batch_size))
             if not batch:
                 break
             yield batch
     
     def upsert_documents(self, documents):
         # Upsert documents in batches with progress tracking
-        for batch in tqdm(self._batched(documents, self.batch_size), total=len(documents)//self.batch_size + 1, desc="Upserting documents"):
+        for batch in tqdm(self._batched(documents), total=len(documents)//self.batch_size + 1, desc="Upserting documents"):
             ids = [doc["id"] for doc in batch]
             vectors = [self._embed(doc["content"]) for doc in batch]
             payloads = batch
@@ -106,7 +105,7 @@ class QdrantHelper:
         )
 
 if __name__ == "__main__":
-    documents = load_documents()
+    # documents = load_documents()
     helper = QdrantHelper()
-    helper.upsert_documents(documents=documents)
+    # helper.upsert_documents(documents=documents)
     print(helper.search('Các quy định chung về Công tác dân tộc'))
