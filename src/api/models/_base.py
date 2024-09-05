@@ -2,6 +2,8 @@ from datetime import datetime
 from abc import abstractmethod
 from typing import List, Dict
 from pydantic import BaseModel as PydanticModel
+from dotenv import load_dotenv
+load_dotenv()
 
 class StreamResponse(PydanticModel):
     response_id: str

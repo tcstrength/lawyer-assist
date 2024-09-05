@@ -5,9 +5,12 @@ Author: tcstrength
 Date: 2024-07-20
 """
 
+import os
 from typing import List, Dict
 from loguru import logger
 from api.models._base import BaseModel
+
+GEMA_HF_TOKEN = os.getenv('GEMA_HF_TOKEN')
 
 # LoRA
 MODEL_ID = "tcstrength/gemma-2b-lawyer-assist"
@@ -46,8 +49,8 @@ except Exception as e:
     from transformers import TextIteratorStreamer
     class GemmaModel(BaseModel):
         def __init__(self, model_id: str = MODEL_ID):
-            self._tokenizer = AutoTokenizer.from_pretrained("tcstrength/gemma-2b-lawyer-assist")
-            self._model = AutoModelForCausalLM.from_pretrained("tcstrength/gemma-2b-lawyer-assist")
+            self._tokenizer = AutoTokenizer.from_pretrained("tcstrength/gemma-2b-lawyer-assist", token=GEMA_HF_TOKEN, device_map="auto")
+            self._model = AutoModelForCausalLM.from_pretrained("tcstrength/gemma-2b-lawyer-assist", token=GEMA_HF_TOKEN, device_map="auto")
             logger.info(f"Model loaded: {model_id}")
         
         def generate(
