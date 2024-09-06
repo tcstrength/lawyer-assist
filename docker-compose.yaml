@@ -1,33 +1,71 @@
 
 services:
   backend:
+    container_name: backend
     build:
       context: .
       dockerfile: src/api/Dockerfile
     ports:
-      - "9000:8000"
+      - 9000:8000
+    env_file:
+      - .env
     volumes:
       - ./src/api:/app/api
+      - ./src/data:/app/data
+      - ./src/util:/app/util
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     depends_on:
       - qdrant
-
+    networks:
+      - my-network
+  
   frontend:
+    container_name: frontend
     build:
       context: .
       dockerfile: src/gui/Dockerfile
     ports:
-      - "3000:8501"
+      - 8505:8501
+    env_file:
+      - .env
     volumes:
       - ./src/gui:/app/gui
+      - ./src/util:/app/util
     stdin_open: true
     tty: true
+    networks:
+      - my-network
 
   qdrant:
     image: qdrant/qdrant
+    restart: always
+    container_name: qdrant
     ports:
-      - "6333:6333"
+      - 6333:6333
+      - 6334:6334
+    expose:
+      - 6333
+      - 6334
+      - 6335
     volumes:
       - qdrant_storage:/qdrant/storage
+    networks:
+      - my-network
 
 volumes:
   qdrant_storage:
+
+networks:
+  my-network:
+    driver: bridge
